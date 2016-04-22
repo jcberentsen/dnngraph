@@ -10,7 +10,6 @@ import           Gen.Caffe.LayerParameter              as LP
 import           Gen.Caffe.PoolingParameter            as PP
 import           Gen.Caffe.PoolingParameter.PoolMethod as PP
 
-import           Control.Applicative
 import           Control.Lens
 import           Data.Graph.Inductive.Graph            hiding ((&))
 import           Language.Lua.Syntax                   hiding (Concat)

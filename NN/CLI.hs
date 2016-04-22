@@ -35,7 +35,8 @@ torchCode net path = do
 data Command = Caffe { _fileName, _binaryToText :: String}
              | Torch { _fileName :: String }
              | Visualize { _fileName :: String, _format :: String }
-makeLenses ''Command
+
+Control.Lens.makeLenses ''Command
 makePrisms ''Command
 
 opts :: Parser Command

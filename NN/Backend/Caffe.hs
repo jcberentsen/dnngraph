@@ -3,7 +3,6 @@ module NN.Backend.Caffe(caffePasses, middleEnd, backend, addConnection, addLabel
 import           Gen.Caffe.LayerParameter   as LP
 import           Gen.Caffe.NetParameter     as NP
 
-import           Control.Applicative
 import           Control.Lens
 import           Data.Char
 import qualified Data.Foldable              as F

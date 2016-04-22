@@ -4,7 +4,6 @@
 {-# LANGUAGE TemplateHaskell            #-}
 module NN.Backend.Torch.Codegen where
 
-import           Control.Applicative
 import           Control.Lens               hiding (assign)
 import           Control.Monad.State.Strict
 import qualified Data.Foldable              as F

@@ -3,7 +3,6 @@
 {-# LANGUAGE DeriveTraversable #-}
 module NN.Backend.Torch.Flat where
 
-import           Control.Applicative
 import           Control.Lens
 import           Control.Monad.State.Strict
 import qualified Data.Foldable              as F
