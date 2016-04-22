@@ -1,5 +1,5 @@
 name:                caffegraph
-version:             0.1.0.2
+version:             0.1.0.3
 description:         A compiler for building, optimizing, visualizing, and generating (Caffe/Torch) DNNs
 license:             BSD3
 license-file:        LICENSE
