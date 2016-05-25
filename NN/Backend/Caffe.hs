@@ -11,6 +11,7 @@ import qualified Data.Graph.Inductive.Graph as G
 import           Data.Graph.Inductive.Query
 import           Data.Maybe
 import qualified Data.Sequence              as S
+import           Data.List (nub)
 
 import           Text.Printf
 import           Text.ProtocolBuffers       as P
@@ -87,5 +88,5 @@ pres gr j = labelled gr (G.pre gr j)
 addConnection :: Pass
 addConnection (gr, i, lp) = lp
                             & LP.name ?~ layerName lp i
-                            & LP.bottom .~ S.fromList (map (uncurry layerName) (pres gr i))
+                            & LP.bottom .~ S.fromList (nub (map (uncurry layerName) (pres gr i)))
                             & LP.top <>~ S.singleton (layerName lp i)
