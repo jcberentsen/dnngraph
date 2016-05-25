@@ -25,7 +25,9 @@ middleEnd :: Net -> Net
 middleEnd = optimizeWith caffePasses
 
 layerName :: LayerParameter -> Int -> Utf8
-layerName l i = printf "%s_%d" (_type' l & fromJust & toString & map toLower) i & s
+layerName l i = case LP._name l of
+    Just n -> n
+    _ -> printf "%s_%d" (_type' l & fromJust & toString & map toLower) i & s
 
 backend :: Net -> NetParameter
 backend gr = def & layer <>~ S.fromList (topsort' gr)
