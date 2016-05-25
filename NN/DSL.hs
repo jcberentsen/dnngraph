@@ -82,8 +82,11 @@ param' v = param .~ fromList v
 
 -- Data
 setF outer f n = set (outer . _Just . f) (Just n)
+voidF outer f = set (outer . _Just . f) Nothing
+
 source' source'' = setF data_param DP.source (s source'')
 cropSize' = setF transform_param TP.crop_size
+scale' = setF transform_param TP.scale
 meanFile' meanFile'' = setF transform_param TP.mean_file (s meanFile'')
 mirror' = setF transform_param TP.mirror
 batchSize' = setF data_param DP.batch_size
@@ -95,6 +98,7 @@ numOutputC' = setConv CP.num_output
 numInputC' = setConv CP.num_input
 kernelSizeC' = setConv CP.kernel_size
 padC' = setConv CP.pad
+noPadC' = voidF convolution_param CP.pad
 groupC' = setConv CP.group
 strideC' = setConv CP.stride
 biasFillerC' = setConv CP.bias_filler
@@ -106,6 +110,7 @@ pool' = setPool PP.pool
 sizeP' = setPool PP.kernel_size
 strideP' = setPool PP.stride
 padP' = setPool PP.pad
+noPadP' = voidF pooling_param PP.pad
 
 -- Inner Product
 setIP = setF inner_product_param
