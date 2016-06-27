@@ -1,5 +1,6 @@
 {-# LANGUAGE DeriveFunctor   #-}
 {-# LANGUAGE TemplateHaskell #-}
+{-# LANGUAGE OverloadedStrings #-}
 module NN.Backend.Torch.Torch where
 
 import           Data.Word
@@ -34,15 +35,15 @@ torchExp module' = PrefixExp (PEFunCall (construct module'))
       construct (TorchModule luaModule torchModule args) =
           NormalFunCall (PEVar (SelectName (var luaModule) torchModule)) (Args args)
 
-convolutionImpl :: Maybe Word32 -> String
-convolutionImpl Nothing = "SpatialConvolutionMM"
-convolutionImpl (Just kW) = if kW > 5 then "SpatialConvolutionFFT" else "SpatialConvolutionMM"
+convolutionImpl :: Maybe Word32 -> Name
+convolutionImpl Nothing = Name "SpatialConvolutionMM"
+convolutionImpl (Just kW) = if kW > 5 then Name "SpatialConvolutionFFT" else Name "SpatialConvolutionMM"
 
 torchModules :: LayerParameter -> [Module TorchModule]
 torchModules lp = go (layerTy lp)
     where
-      nn name' args = Inner $ TorchModule "nn" name' (toLua <$> args)
-      criterion name' = Criterion $ TorchModule "nn" name' []
+      nn name' args = Inner $ TorchModule (Name "nn") name' (toLua <$> args)
+      criterion name' = Criterion $ TorchModule (Name "nn") name' []
       nn' name' = nn name' ([] :: [Float])
 
       -- Ugly case anaysis, sorry.
@@ -53,8 +54,8 @@ torchModules lp = go (layerTy lp)
             dW = poolP PP.stride
             dH = dW
             ty' = case poolP PP.pool of
-                   Just MAX -> "SpatialMaxPooling"
-                   Just AVE -> "SpatialAveragePooling"
+                   Just MAX -> Name "SpatialMaxPooling"
+                   Just AVE -> Name "SpatialAveragePooling"
                    _ -> error "Unsupported Pooling Type"
             poolP f = lp ^?! LP.pooling_param._Just ^?! f
       go Conv = [nn (convolutionImpl kW) [nInputPlane, nOutputPlane, kW, kH, dW, dH, padding]]
@@ -68,15 +69,15 @@ torchModules lp = go (layerTy lp)
             nInputPlane = Nothing
             nOutputPlane = convP CP.num_output
             convP f = lp ^?! LP.convolution_param._Just ^?! f
-      go ReLU = [nn' "Threshold"]
-      go IP = [nn "Linear" [nInput, nOutput]]
+      go ReLU = [nn' (Name "Threshold")]
+      go IP = [nn (Name "Linear") [nInput, nOutput]]
           where
             -- TODO - propagation pass to size the layers
             nInput = Nothing
             nOutput = lp ^?! LP.inner_product_param._Just ^?! IP.num_output
-      go Dropout = [nn "Dropout" [ratio]] where
+      go Dropout = [nn (Name "Dropout") [ratio]] where
           Just ratio = lp ^?! LP.dropout_param._Just ^?! DP.dropout_ratio
-      go SoftmaxWithLoss = [nn' "LogSoftMax", criterion "ClassNLLCriterion"]
+      go SoftmaxWithLoss = [nn' (Name "LogSoftMax"), criterion (Name "ClassNLLCriterion")]
       go Concat = [] -- Handled by flattening implementation
       go ty' = error  $ "Unhandled layer type: " ++ show ty'
 

@@ -2,6 +2,7 @@ module NN.Backend.Torch.Lua where
 
 import           Data.Word
 import           Language.Lua.Syntax
+import qualified Data.Text as T
 
 newtype LS = L String
 
@@ -10,13 +11,13 @@ class ToLua a where
     toLua :: a -> Exp
 
 instance ToLua Word32 where
-    toLua = Number . show
+    toLua = Number . T.pack . show
 
 instance ToLua LS where
-    toLua (L s') = String s'
+    toLua (L s') = String (T.pack s')
 
 instance ToLua Float where
-    toLua = Number . show
+    toLua = Number . T.pack . show
 
 instance (ToLua a) => ToLua (Maybe a) where
     toLua Nothing = Nil
@@ -27,7 +28,7 @@ assign :: Name -> Exp -> Stat
 assign lval exp' = LocalAssign [lval] (Just [exp'])
 
 require :: Name -> Stat
-require module' = funCall "require" [toLua $ L module']
+require (Name module') = funCall (Name (T.pack "require")) [String module']
 
 funCall :: Name -> [Exp] -> Stat
 funCall name' args = FunCall (NormalFunCall (var name') (Args args))

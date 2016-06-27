@@ -12,6 +12,7 @@ import           Gen.Caffe.LayerParameter   as LP
 import           Language.Lua.PrettyPrinter
 import           Language.Lua.Syntax
 import           Text.Printf
+import qualified Data.Text as T
 
 import           NN.Backend.Torch.Flat
 import           NN.Backend.Torch.Lua
@@ -36,13 +37,13 @@ newtype Torch a = Torch { _unTorch :: State TorchState a }
 xs <>+ x = xs <>= [x]
 
 imports :: Torch ()
-imports = statements <>+ require "nn"
+imports = statements <>+ require (Name "nn")
 
-fresh :: String -> Torch String
+fresh :: T.Text -> Torch Name
 fresh prefix = do
   c <- use count
   count += 1
-  return $ printf "%s%d" prefix c
+  return $ Name $ T.pack $ printf "%s%d" (show prefix) c
 
 finalize :: Name -> [Exp] -> Torch Block
 finalize id' criteria' = do
@@ -54,12 +55,12 @@ finalize id' criteria' = do
   return $ Block statements' (Just $ return' <$> id':criteriaNames')
 
 insertContainer :: Name -> Exp -> [Flat Exp] -> Torch Name
-insertContainer prefix containerModule exps' = do
+insertContainer (Name prefix) containerModule exps' = do
   name' <- fresh prefix
   statements <>+ assign name' containerModule
   forM_ exps' $ \exp' -> do
     innerName' <- insert exp'
-    statements <>+ methCall name' "add" [var' innerName']
+    statements <>+ methCall name' (Name "add") [var' innerName']
   return name'
 
 
@@ -68,12 +69,12 @@ insert (Single exp') = do
   name' <- fresh "mod"
   statements <>+ assign name' exp'
   return name'
-insert (Seq exps') = insertContainer "seq" sequential' exps'
+insert (Seq exps') = insertContainer (Name "seq") sequential' exps'
     where
-      sequential' = torchExp (TorchModule "nn" "Sequential" [])
-insert (Par exps') = insertContainer "par" depthConcat' exps'
+      sequential' = torchExp (TorchModule (Name "nn") (Name "Sequential") [])
+insert (Par exps') = insertContainer (Name "par") depthConcat' exps'
     where
-      depthConcat' = torchExp (TorchModule "nn" "DepthConcat" [])
+      depthConcat' = torchExp (TorchModule (Name "nn") (Name "DepthConcat") [])
 
 runTorch :: Flat LayerParameter -> Torch Block
 runTorch root = do
