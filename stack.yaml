@@ -2,6 +2,7 @@ flags: {}
 packages:
 - '.'
 extra-deps:
+- dlist-0.7.1.2
 - graphviz-2999.18.1.0
-- language-lua-0.9.0
-resolver: lts-6.5
+- language-lua-0.10.0
+resolver: lts-7.2
